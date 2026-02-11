@@ -51,20 +51,6 @@ npm start
 http://localhost:3000
 ```
 
-## Deployment to Vercel
-
-This application is configured for easy deployment to Vercel:
-
-1. Install Vercel CLI (if not already installed):
-```bash
-npm install -g vercel
-```
-
-2. Deploy to Vercel:
-```bash
-vercel
-```
-
 Or simply connect your GitHub repository to Vercel and it will automatically deploy.
 
 ## API Endpoints
@@ -81,7 +67,6 @@ Or simply connect your GitHub repository to Vercel and it will automatically dep
 simple-todo-list/
 ├── index.js           # Express server and API routes
 ├── package.json       # Project dependencies
-├── vercel.json        # Vercel deployment configuration
 ├── todos.json         # JSON file for storing todos (auto-generated)
 └── public/
     ├── index.html     # Main HTML file
@@ -91,4 +76,4 @@ simple-todo-list/
 
 ## License
 
-ISC
+MIT
