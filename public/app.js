@@ -64,7 +64,8 @@ async function toggleTodo(id) {
         
         if (response.ok) {
             const updatedTodo = await response.json();
-            const index = todos.findIndex(t => t.id === id);
+            // แก้ไข 1: ใช้ == เพื่อให้รหัสที่เป็นตัวเลขกับตัวหนังสือคุยกันรู้เรื่อง
+            const index = todos.findIndex(t => t.id == id);
             if (index !== -1) {
                 todos[index] = updatedTodo;
                 renderTodos();
@@ -86,7 +87,8 @@ async function deleteTodo(id) {
         });
         
         if (response.ok) {
-            todos = todos.filter(t => t.id !== id);
+            // แก้ไข 1: ใช้ != เช่นกัน
+            todos = todos.filter(t => t.id != id);
             renderTodos();
         } else {
             alert('Failed to delete todo');
@@ -108,12 +110,13 @@ function renderTodos() {
                     type="checkbox" 
                     class="todo-checkbox" 
                     ${todo.completed ? 'checked' : ''} 
-                    onchange="toggleTodo(${todo.id})"
+                    onchange="toggleTodo('${todo.id}')" 
                 />
                 <span class="todo-text">${escapeHtml(todo.text)}</span>
-                <button class="delete-btn" onclick="deleteTodo(${todo.id})">Delete</button>
+                <button class="delete-btn" onclick="deleteTodo('${todo.id}')">Delete</button>
             </div>
         `).join('');
+        // ^^^ แก้ไข 2: สังเกตตรง toggleTodo('${todo.id}') มีขีดเดียวครอบอยู่
     }
     
     updateStats();
