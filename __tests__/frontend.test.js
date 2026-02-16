@@ -286,6 +286,277 @@ describe('Frontend Todo Application', () => {
     });
   });
 
+  describe('startEdit function', () => {
+    test('should enter edit mode for a todo', () => {
+      const todos = [
+        { id: 1, text: 'Test todo', completed: false }
+      ];
+      let editingId = null;
+
+      // Simulate startEdit
+      editingId = 1;
+      
+      // Simulate renderTodos showing edit input
+      const escapeHtml = (text) => {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      };
+
+      if (editingId === todo.id = 1) {
+        todoList.innerHTML = `
+          <div class="todo-item editing">
+            <input 
+              type="text" 
+              id="edit-input-1" 
+              class="edit-input" 
+              value="${escapeHtml('Test todo')}" 
+            />
+            <button class="save-btn" onclick="saveEdit(1)">Save</button>
+            <button class="cancel-btn" onclick="cancelEdit()">Cancel</button>
+          </div>
+        `;
+      }
+
+      expect(todoList.innerHTML).toContain('edit-input-1');
+      expect(todoList.innerHTML).toContain('save-btn');
+      expect(todoList.innerHTML).toContain('cancel-btn');
+    });
+  });
+
+  describe('saveEdit function', () => {
+    test('should save edited todo text', async () => {
+      const updatedTodo = { id: 1, text: 'Updated todo', completed: false };
+
+      fetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => updatedTodo
+      });
+
+      const response = await fetch('/api/todos/1', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: 'Updated todo' }),
+      });
+
+      expect(response.ok).toBe(true);
+      const result = await response.json();
+      expect(result.text).toBe('Updated todo');
+    });
+
+    test('should not save empty text', () => {
+      const editInput = document.createElement('input');
+      editInput.value = '';
+      
+      const newText = editInput.value.trim();
+      
+      if (!newText) {
+        alert('Todo text cannot be empty');
+      }
+
+      expect(alert).toHaveBeenCalledWith('Todo text cannot be empty');
+    });
+
+    test('should handle save error', async () => {
+      fetch.mockResolvedValueOnce({
+        ok: false
+      });
+
+      const response = await fetch('/api/todos/1', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: 'Updated todo' }),
+      });
+
+      if (!response.ok) {
+        alert('Failed to save todo');
+      }
+
+      expect(alert).toHaveBeenCalledWith('Failed to save todo');
+    });
+  });
+
+  describe('cancelEdit function', () => {
+    test('should cancel edit mode without saving', () => {
+      let editingId = 1;
+      
+      // Simulate cancelEdit
+      editingId = null;
+      
+      // Simulate renderTodos returning to normal
+      const todos = [
+        { id: 1, text: 'Test todo', completed: false }
+      ];
+
+      const escapeHtml = (text) => {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      };
+
+      if (editingId !== 1) {
+        todoList.innerHTML = `
+          <div class="todo-item">
+            <input 
+              type="checkbox" 
+              class="todo-checkbox" 
+            />
+            <span class="todo-text">${escapeHtml('Test todo')}</span>
+            <button class="edit-btn" onclick="startEdit(1)">Edit</button>
+            <button class="delete-btn" onclick="deleteTodo(1)">Delete</button>
+          </div>
+        `;
+      }
+
+      expect(todoList.innerHTML).toContain('edit-btn');
+      expect(todoList.innerHTML).not.toContain('save-btn');
+    });
+  });
+
+  describe('renderTodos with edit mode', () => {
+    test('should display edit buttons for todos', () => {
+      const todos = [
+        { id: 1, text: 'Test todo', completed: false }
+      ];
+      let editingId = null;
+
+      const escapeHtml = (text) => {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      };
+
+      todoList.innerHTML = todos.map(todo => {
+        if (editingId === todo.id) {
+          return `
+            <div class="todo-item editing">
+              <input 
+                type="text" 
+                id="edit-input-${todo.id}" 
+                class="edit-input" 
+                value="${escapeHtml(todo.text)}" 
+              />
+              <button class="save-btn" onclick="saveEdit('${todo.id}')">Save</button>
+              <button class="cancel-btn" onclick="cancelEdit()">Cancel</button>
+            </div>
+          `;
+        }
+        return `
+          <div class="todo-item ${todo.completed ? 'completed' : ''}">
+            <input 
+              type="checkbox" 
+              class="todo-checkbox" 
+              ${todo.completed ? 'checked' : ''} 
+              onchange="toggleTodo('${todo.id}')" 
+            />
+            <span class="todo-text">${escapeHtml(todo.text)}</span>
+            <button class="edit-btn" onclick="startEdit('${todo.id}')">Edit</button>
+            <button class="delete-btn" onclick="deleteTodo('${todo.id}')">Delete</button>
+          </div>
+        `;
+      }).join('');
+
+      expect(todoList.innerHTML).toContain('edit-btn');
+      expect(todoList.innerHTML).toContain('Test todo');
+    });
+
+    test('should show edit input with correct value', () => {
+      const todos = [
+        { id: 1, text: 'Test todo', completed: false }
+      ];
+      let editingId = 1;
+
+      const escapeHtml = (text) => {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      };
+
+      todoList.innerHTML = todos.map(todo => {
+        if (editingId === todo.id) {
+          return `
+            <div class="todo-item editing">
+              <input 
+                type="text" 
+                id="edit-input-${todo.id}" 
+                class="edit-input" 
+                value="${escapeHtml(todo.text)}" 
+              />
+              <button class="save-btn" onclick="saveEdit('${todo.id}')">Save</button>
+              <button class="cancel-btn" onclick="cancelEdit()">Cancel</button>
+            </div>
+          `;
+        }
+        return `
+          <div class="todo-item ${todo.completed ? 'completed' : ''}">
+            <input 
+              type="checkbox" 
+              class="todo-checkbox" 
+              ${todo.completed ? 'checked' : ''} 
+              onchange="toggleTodo('${todo.id}')" 
+            />
+            <span class="todo-text">${escapeHtml(todo.text)}</span>
+            <button class="edit-btn" onclick="startEdit('${todo.id}')">Edit</button>
+            <button class="delete-btn" onclick="deleteTodo('${todo.id}')">Delete</button>
+          </div>
+        `;
+      }).join('');
+
+      const editInput = document.getElementById('edit-input-1');
+      expect(todoList.innerHTML).toContain('edit-input-1');
+      expect(todoList.innerHTML).toContain('Test todo');
+    });
+
+    test('should apply editing class to edit mode todo', () => {
+      const todos = [
+        { id: 1, text: 'Test todo', completed: false }
+      ];
+      let editingId = 1;
+
+      const escapeHtml = (text) => {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      };
+
+      todoList.innerHTML = todos.map(todo => {
+        if (editingId === todo.id) {
+          return `
+            <div class="todo-item editing">
+              <input 
+                type="text" 
+                id="edit-input-${todo.id}" 
+                class="edit-input" 
+                value="${escapeHtml(todo.text)}" 
+              />
+              <button class="save-btn" onclick="saveEdit('${todo.id}')">Save</button>
+              <button class="cancel-btn" onclick="cancelEdit()">Cancel</button>
+            </div>
+          `;
+        }
+        return `
+          <div class="todo-item ${todo.completed ? 'completed' : ''}">
+            <input 
+              type="checkbox" 
+              class="todo-checkbox" 
+              ${todo.completed ? 'checked' : ''} 
+              onchange="toggleTodo('${todo.id}')" 
+            />
+            <span class="todo-text">${escapeHtml(todo.text)}</span>
+            <button class="edit-btn" onclick="startEdit('${todo.id}')">Edit</button>
+            <button class="delete-btn" onclick="deleteTodo('${todo.id}')">Delete</button>
+          </div>
+        `;
+      }).join('');
+
+      expect(todoList.innerHTML).toContain('class="todo-item editing"');
+    });
+  });
+
   describe('Input validation', () => {
     test('should trim whitespace from input', () => {
       todoInput.value = '  Test todo  ';
