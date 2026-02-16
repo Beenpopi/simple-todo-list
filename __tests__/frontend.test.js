@@ -303,7 +303,8 @@ describe('Frontend Todo Application', () => {
         return div.innerHTML;
       };
 
-      if (editingId === todo.id = 1) {
+      const todo = todos[0];
+      if (editingId === todo.id) {
         todoList.innerHTML = `
           <div class="todo-item editing">
             <input 
